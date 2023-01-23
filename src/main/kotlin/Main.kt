@@ -10,9 +10,9 @@ fun main(args: Array<String>) {
     chatService.sendMessage(0,3,3,"I am tree")
     chatService.sendMessage(0,3,3,"I am four")
     chatService.sendMessage(0,3,3,"I am five")
-    println("1111111111111111111111111111")
+    println("-----------------getMessageFromChat-------------")
     println(chatService.getMessageFromChat(3,1,3))
-    println("1111111111111111111111111111")
+    println("---------------------------------")
     println("-------")
     println(chatService.chats)
     println("---------getUnreadChatsCount------------------")
@@ -63,16 +63,17 @@ class ChatService() {
     fun getMessageFromChat(
         id: Int,
         lastMessageId: Int,
-        countMessage: Long
-    ): List<Message> {
-        var findChat = chats.find { chat: Chat -> id == chat.id }
-        if (findChat == null) {
-            throw ChatNotFoundException("No chat with Id = $id")
-        } else {
-            return findChat.message.stream().filter {message: Message -> message.id >= lastMessageId }.limit(countMessage).toList().setRead()
-        }
-    }
-    fun List<Message>.setRead(): List<Message>{
+        countMessage: Int
+    ): List<Message> =
+         chats.singleOrNull{id == it.id }
+            .let { it?.message ?: throw ChatNotFoundException("No chat with Id = $id") }
+            .asSequence()
+            .drop(lastMessageId - 1)
+            .take(countMessage)
+            .toList()
+            .setRead()
+
+    private fun List<Message>.setRead(): List<Message>{
         this.forEach { it.read = true }
         return this
     }
